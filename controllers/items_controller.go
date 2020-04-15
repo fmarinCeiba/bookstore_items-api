@@ -25,29 +25,35 @@ type itemsController struct{}
 
 func (c *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 	if err := oauth.AuthenticateRequest(r); err != nil {
-		http_utils.ResponseError(w, *err)
+		http_utils.ResponseError(w, err)
+		return
+	}
+	sellerID := oauth.GetCallerID(r)
+	if sellerID == 0 {
+		rErr := rest_errors.NewUnauthorizedError("invalid request body")
+		http_utils.ResponseError(w, rErr)
 		return
 	}
 
 	rBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		rErr := rest_errors.NewBadRequestError("invalid request body")
-		http_utils.ResponseError(w, *rErr)
+		http_utils.ResponseError(w, rErr)
 		return
 	}
 	defer r.Body.Close()
 	var iRequest items.Item
 	if err := json.Unmarshal(rBody, &iRequest); err != nil {
 		rErr := rest_errors.NewBadRequestError("invalid json body")
-		http_utils.ResponseError(w, *rErr)
+		http_utils.ResponseError(w, rErr)
 		return
 	}
 
-	iRequest.Seller = oauth.GetCallerID(r)
+	iRequest.Seller = sellerID
 
 	result, cErr := services.ItemsService.Create(iRequest)
 	if cErr != nil {
-		http_utils.ResponseError(w, *cErr)
+		http_utils.ResponseError(w, cErr)
 		return
 	}
 

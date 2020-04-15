@@ -12,16 +12,19 @@ var (
 )
 
 type itemsServiceInterface interface {
-	Create(items.Item) (*items.Item, *rest_errors.RestErr)
-	Get(string) (*items.Item, *rest_errors.RestErr)
+	Create(items.Item) (*items.Item, rest_errors.RestErr)
+	Get(string) (*items.Item, rest_errors.RestErr)
 }
 
 type itemsService struct{}
 
-func (s *itemsService) Create(i items.Item) (*items.Item, *rest_errors.RestErr) {
-	return nil, rest_errors.NewRestError("implement me!", http.StatusNotImplemented, "not_implemented", nil)
+func (s *itemsService) Create(i items.Item) (*items.Item, rest_errors.RestErr) {
+	if err := i.Save(); err != nil {
+		return nil, err
+	}
+	return &i, nil
 }
 
-func (s *itemsService) Get(i string) (*items.Item, *rest_errors.RestErr) {
+func (s *itemsService) Get(i string) (*items.Item, rest_errors.RestErr) {
 	return nil, rest_errors.NewRestError("implement me!", http.StatusNotImplemented, "not_implemented", nil)
 }
